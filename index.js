@@ -15,20 +15,39 @@ app.post("/webhook", line.middleware(config), (req, res) => {
     .catch((err) => res.status(500).end());
 });
 
+const stages = [
+  "告知・検査中",
+  "手術前の準備中",
+  "手術・入院中",
+  "治療中",
+  "効果の確認中",
+  "経過観察中",
+];
+
 async function handleEvent(event) {
+  // 友だち追加時
+  if (event.type === "follow") {
+    const userId = event.source.userId;
+    return client.pushMessage(userId, {
+      type: "text",
+      text: "さいごに1つだけ教えてください。\n今、どの状況ですか？\n\n選んでいただいた状況に合わせたメッセージを明日からお送りします。",
+      quickReply: {
+        items: stages.map((stage) => ({
+          type: "action",
+          action: {
+            type: "message",
+            label: stage,
+            text: stage,
+          },
+        })),
+      },
+    });
+  }
+
+  // 通常メッセージの処理
   if (event.type !== "message" || event.message.type !== "text") return;
 
   const userText = event.message.text;
-
-  // クイックリプライの選択肢
-  const stages = [
-    "告知・検査中",
-    "手術前の準備中",
-    "手術・入院中",
-    "抗がん剤・放射線治療中",
-    "効果を確認中",
-    "経過観察中",
-  ];
 
   // 選択肢が選ばれた場合
   if (stages.includes(userText)) {
@@ -38,7 +57,7 @@ async function handleEvent(event) {
     });
   }
 
-  // それ以外のメッセージ → クイックリプライを表示
+  // それ以外のメッセージ
   return client.replyMessage(event.replyToken, {
     type: "text",
     text: "現在の状況を教えてください。",
