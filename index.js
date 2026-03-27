@@ -19,7 +19,7 @@ async function handleEvent(event) {
   if (event.type !== "message" || event.message.type !== "text") return;
   return client.replyMessage(event.replyToken, {
     type: "text",
-    text: event.message.text, // オウム返し
+    text: event.message.text,
   });
 }
 
