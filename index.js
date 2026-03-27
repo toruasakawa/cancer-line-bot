@@ -53,7 +53,7 @@ async function handleEvent(event) {
   if (stages.includes(userText)) {
     return client.replyMessage(event.replyToken, {
       type: "text",
-      text: `「${userText}」を選んでいただきありがとうございます。状況に合わせた情報をお届けします。`,
+      text: `「${userText}」を選んでいただきありがとうございます。明日から、状況に合わせた情報をお届けします。`,
     });
   }
 
