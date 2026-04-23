@@ -1,0 +1,7 @@
+1. index.jsを編集、保存して閉じる。
+2.コマンドプロンプトでcd renderフォルダ
+cd C:\Users\coach\OneDrive\デスクトップ\よく使うもの\進行中ビジネス\難病ノート販売\lineメッセ\render
+
+git add .
+git commit -m "update follow message"
+git push
