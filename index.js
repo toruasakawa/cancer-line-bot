@@ -27,6 +27,21 @@ const stages = [
   "わからない・未確認",
 ];
 
+// 告知時期の選択肢 → 基準日を計算するためのオフセット（日数）
+const DIAGNOSIS_CHOICES = [
+  { label: "1週間以内",  offsetDays: 3   },
+  { label: "約1ヶ月前",  offsetDays: 30  },
+  { label: "約3ヶ月前",  offsetDays: 90  },
+  { label: "約半年前",   offsetDays: 180 },
+  { label: "1年以上前",  offsetDays: 400 },
+];
+
+function calcDiagnosisDate(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() - offsetDays);
+  return d.toISOString().split("T")[0]; // YYYY-MM-DD
+}
+
 const questions = {
   "告知・検査中": [
     { text: "職場への報告はもうされましたか？", choices: ["はい", "まだ"] },
@@ -98,6 +113,25 @@ app.post("/webhook", line.middleware(config), (req, res) => {
     .catch((err) => res.status(500).end());
 });
 
+// ── 診断時期を質問する ────────────────────────────
+async function askDiagnosisDate(replyToken) {
+  return client.replyMessage(replyToken, {
+    type: "text",
+    text: "告知はいつ頃でしたか？",
+    quickReply: {
+      items: DIAGNOSIS_CHOICES.map((c) => ({
+        type: "action",
+        action: {
+          type: "message",
+          label: c.label,
+          text: c.label,
+        },
+      })),
+    },
+  });
+}
+
+// ── Q&A を順番に送る ─────────────────────────────
 async function sendNextQuestion(replyToken, userId) {
   const state = userState[userId];
   const stageQuestions = questions[state.stage];
@@ -121,15 +155,16 @@ async function sendNextQuestion(replyToken, userId) {
     });
   }
 
-  // ── Supabase に保存 ──────────────────────────
+  // ── 全問完了 → Supabase に保存 ──────────────────
   const { error } = await supabase
     .from("onboardings")
     .upsert(
       {
-        user_id:          userId,
-        stage:            state.stage,
-        answers:          state.answers,
-        alert_scheduled:  false,
+        user_id:         userId,
+        stage:           state.stage,
+        diagnosis_date:  state.diagnosis_date,
+        answers:         state.answers,
+        alert_scheduled: false,
       },
       { onConflict: "user_id" }
     );
@@ -168,24 +203,41 @@ async function handleEvent(event) {
   const userId = event.source.userId;
   const userText = event.message.text;
 
+  // ── ステージ選択 → 診断時期を質問 ────────────────
   if (stages.includes(userText)) {
     userState[userId] = {
-      stage: userText,
-      questionIndex: 0,
-      answers: {},
+      stage:          userText,
+      phase:          "diagnosis_date", // 次は診断時期を受け取る
+      questionIndex:  0,
+      answers:        {},
+      diagnosis_date: null,
     };
-    return sendNextQuestion(event.replyToken, userId);
+    return askDiagnosisDate(event.replyToken, userId);
   }
 
   if (userState[userId]) {
     const state = userState[userId];
-    const stageQuestions = questions[state.stage];
-    const currentQuestion = stageQuestions[state.questionIndex];
 
-    state.answers[currentQuestion.text] = userText;
-    state.questionIndex += 1;
+    // ── 診断時期の回答を受け取る ──────────────────
+    if (state.phase === "diagnosis_date") {
+      const choice = DIAGNOSIS_CHOICES.find((c) => c.label === userText);
+      if (choice) {
+        state.diagnosis_date = calcDiagnosisDate(choice.offsetDays);
+        state.phase = "questions";
+        return sendNextQuestion(event.replyToken, userId);
+      }
+      // 選択肢以外が来た場合は再質問
+      return askDiagnosisDate(event.replyToken, userId);
+    }
 
-    return sendNextQuestion(event.replyToken, userId);
+    // ── Q&A の回答を受け取る ──────────────────────
+    if (state.phase === "questions") {
+      const stageQuestions = questions[state.stage];
+      const currentQuestion = stageQuestions[state.questionIndex];
+      state.answers[currentQuestion.text] = userText;
+      state.questionIndex += 1;
+      return sendNextQuestion(event.replyToken, userId);
+    }
   }
 
   return client.replyMessage(event.replyToken, {
