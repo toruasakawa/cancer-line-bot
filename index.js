@@ -1,5 +1,11 @@
 const express = require("express");
 const line = require("@line/bot-sdk");
+const { createClient } = require("@supabase/supabase-js");
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 const config = {
   channelSecret: process.env.CHANNEL_SECRET,
@@ -113,6 +119,22 @@ async function sendNextQuestion(replyToken, userId) {
         })),
       },
     });
+  }
+
+  // ── Supabase に保存 ──────────────────────────
+  const { error } = await supabase
+    .from("onboardings")
+    .upsert(
+      {
+        user_id:          userId,
+        stage:            state.stage,
+        answers:          state.answers,
+        alert_scheduled:  false,
+      },
+      { onConflict: "user_id" }
+    );
+  if (error) {
+    console.error("[onboarding] Supabase保存エラー:", error.message);
   }
 
   delete userState[userId];
