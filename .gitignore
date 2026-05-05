@@ -1,0 +1,28 @@
+# 環境変数
+.env
+.env.local
+.env.*.local
+
+# 依存パッケージ
+node_modules/
+
+# 出力ファイル（生成物はgit管理外）
+outputs/
+
+# 入力素材（Wordファイル等）
+inputs/
+
+# ログ
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# エディタ
+.vscode/
+.idea/
+
+# Vercel
+.vercel/

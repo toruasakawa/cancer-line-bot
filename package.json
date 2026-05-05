@@ -1,0 +1,23 @@
+{
+  "name": "nanbyou-navi",
+  "version": "1.0.0",
+  "description": "難病ナビ 自動化スクリプト群",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "kpi": "node scripts/kpi/index.js",
+    "sns": "node scripts/sns/index.js",
+    "content": "node scripts/content/index.js",
+    "alerts": "node scripts/alerts/index.js",
+    "seo": "node scripts/seo/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@supabase/supabase-js": "^2.49.4",
+    "axios": "^1.8.4",
+    "dotenv": "^17.4.0",
+    "fast-xml-parser": "^5.5.9",
+    "mammoth": "^1.12.0"
+  }
+}

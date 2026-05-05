@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm audit:*)",
+      "WebFetch(domain:www.nanbyou.or.jp)",
+      "WebFetch(domain:www.mhlw.go.jp)",
+      "WebFetch(domain:ganjoho.jp)",
+      "WebFetch(domain:www.ncc.go.jp)",
+      "Bash(RUN_MODE=dry-run npm run seo)",
+      "Bash(RUN_MODE=production npm run seo)",
+      "Bash(RUN_MODE=dry-run npm run kpi)",
+      "Bash(RUN_MODE=dry-run npm run alerts)",
+      "Bash(RUN_MODE=production npm run alerts)",
+      "Bash(pandoc \"C:\\\\Users\\\\coach\\\\OneDrive\\\\デスクトップ\\\\よく使うもの\\\\進行中ビジネス\\\\難病ノート販売\\\\やること・スケジュールなど\\\\stage_design_v3.docx\" -o /tmp/stage_design_v3.md)",
+      "Read(//tmp/**)",
+      "Bash(mkdir -p stage_unpack)",
+      "Bash(python3 -c \":*)",
+      "Bash(python3:*)",
+      "Bash(RUN_MODE=dry-run npm run content)",
+      "Bash(RUN_MODE=production npm run content)",
+      "Bash(node -e \":*)",
+      "Bash(node -e ':*)"
+    ]
+  }
+}

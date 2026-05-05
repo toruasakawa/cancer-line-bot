@@ -1,0 +1,34 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/seo",
+      "schedule": "0 1 * * 1",
+      "comment": "SEO監視 毎週月曜 10:00 JST"
+    },
+    {
+      "path": "/api/cron/kpi",
+      "schedule": "0 1 1 * *",
+      "comment": "KPI収集 毎月1日 10:00 JST"
+    },
+    {
+      "path": "/api/cron/alerts",
+      "schedule": "0 0,12 * * *",
+      "comment": "アラートスケジューリング 1日2回 (09:00/21:00 JST)"
+    },
+    {
+      "path": "/api/cron/sns",
+      "schedule": "0 14 * * *",
+      "comment": "SNS投稿スロット1 23:00 JST"
+    },
+    {
+      "path": "/api/cron/sns",
+      "schedule": "0 15 * * *",
+      "comment": "SNS投稿スロット2 00:00 JST"
+    },
+    {
+      "path": "/api/cron/sns",
+      "schedule": "0 16 * * *",
+      "comment": "SNS投稿スロット3 01:00 JST"
+    }
+  ]
+}
